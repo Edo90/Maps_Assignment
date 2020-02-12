@@ -28,14 +28,21 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if(checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
             requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),1)
-        }
-        when(item.itemId){
-            R.id.test -> {
-                val intent = Intent(applicationContext,MapsActivity::class.java)
-                startActivity(intent)
-            }
-
+        }else{
+            moveToMapsActivity()
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        if(requestCode == 1){
+            moveToMapsActivity()
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
+
+    private fun moveToMapsActivity() {
+        val intent = Intent(applicationContext, MapsActivity::class.java)
+        startActivity(intent)
     }
 }
