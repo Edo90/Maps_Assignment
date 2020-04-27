@@ -2,5 +2,7 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/kotlin-coroutines" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/kotlin-coroutines/ktx-library-codelab/work/myktxlibrary/src/main/kotlin-coroutines" vcs="Git" />
   </component>
 </project>
