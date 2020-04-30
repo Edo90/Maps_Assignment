@@ -1,32 +1,19 @@
 package com.example.mapsassignment
 
-import android.app.Application
-import android.content.Context
-import android.content.pm.PackageManager
-import android.location.*
-import androidx.appcompat.app.AppCompatActivity
+import android.location.Geocoder
 import android.os.Bundle
-import android.view.View
-import android.widget.Toast
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-
+import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
-import java.lang.Exception
 import java.util.*
-import java.util.jar.Manifest
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
-    private var locationManager: LocationManager? = null
-    private var locationListener: LocationListener? = null
-    private var addressArrayList : ArrayList<LatLng>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,7 +23,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
-        //val databasedb: SQLLiteDatabase
     }
 
     /**
@@ -50,77 +36,32 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
      */
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-
         mMap.setOnMapLongClickListener(listener)
-
-        locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-
-        locationListener = object : LocationListener{
-            override fun onLocationChanged(location: Location?) {
-                if(location != null){
-                    mMap.clear()
-                    val userLocation = LatLng(location.latitude,location.longitude)
-                    setAddressOnMarker(userLocation)
-                }
-            }
-
-            override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-            }
-
-            override fun onProviderEnabled(provider: String?) {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-            }
-
-            override fun onProviderDisabled(provider: String?) {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-            }
-
-        }
-
-//        if(ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
-//            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), 1)
-//        }else{
-//            locationManager!!.requestLocationUpdates(LocationManager.GPS_PROVIDER,2,10f,locationListener)
-//
-//            //val lastLocation = locationManager!!.getLastKnownLocation(LocationManager.GPS_PROVIDER)
-//            var criteria = Criteria()
-//            criteria.accuracy = Criteria.ACCURACY_FINE
-//            val userBestProvider = locationManager!!.getBestProvider(criteria,true);
-//
-//            val userBestLocation = locationManager!!.getLastKnownLocation(userBestProvider)
-//            var userLastLocation = LatLng(userBestLocation.latitude,userBestLocation.longitude)
-//            setAddressOnMarker(userLastLocation)
-        }
-
-    private val listener = object : GoogleMap.OnMapLongClickListener{
-        override fun onMapLongClick(p0: LatLng?) {
-            setAddressOnMarker(p0)
-        }
-
     }
+
+    private val listener = GoogleMap.OnMapLongClickListener { p0 -> setAddressOnMarker(p0) }
+
     private fun setAddressOnMarker(location: LatLng?) {
-        val geocoder = Geocoder(applicationContext, Locale.getDefault())
+        val geocode = Geocoder(applicationContext, Locale.getDefault())
         var address = ""
         try {
-            val addressList = geocoder.getFromLocation(location!!.latitude,location.longitude,1)
-            if(addressList != null && addressList.size > 0){
-                if(addressList[0].thoroughfare != null){
+            val addressList = geocode.getFromLocation(location!!.latitude, location.longitude, 1)
+            if (addressList != null && addressList.size > 0) {
+                if (addressList[0].thoroughfare != null) {
                     address += addressList[0].thoroughfare
-                    if(addressList[0].subThoroughfare != null){
-                        address += ", "+addressList[0].subThoroughfare
+                    if (addressList[0].subThoroughfare != null) {
+                        address += ", " + addressList[0].subThoroughfare
                     }
                 }
             }
-        }catch (e : Exception){
+        } catch (e: Exception) {
             e.printStackTrace()
         }
-        if(address.equals("")){
+        if (address == "") {
             address = "No Address"
         }
 
         mMap.addMarker(MarkerOptions().position(location!!).title(address))
-        mMap.moveCamera((CameraUpdateFactory.newLatLngZoom(location,16f)))
+        mMap.moveCamera((CameraUpdateFactory.newLatLngZoom(location, 16f)))
     }
-
 }
