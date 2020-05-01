@@ -1,6 +1,11 @@
 package com.example.mapsassignment
 
+import android.Manifest.permission.ACCESS_FINE_LOCATION
+import android.content.Context
+import android.content.pm.PackageManager
+import android.location.Criteria
 import android.location.Geocoder
+import android.location.LocationManager
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -9,11 +14,18 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import java.security.Permission
+import java.security.Permissions
+import java.security.Provider
 import java.util.*
+import java.util.jar.Manifest
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
+    private lateinit var locationManager : LocationManager
+    private lateinit var criteria: Criteria
+    private val ZOOM_LEVEL = 16f
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,6 +49,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         mMap.setOnMapLongClickListener(listener)
+        mMap.isMyLocationEnabled = true
+
+        locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        if (checkSelfPermission(ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+            val lastKnowLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+            val lastKnownLocationLatLng = LatLng(lastKnowLocation!!.latitude,lastKnowLocation.longitude)
+            mMap.moveCamera((CameraUpdateFactory.newLatLngZoom(lastKnownLocationLatLng,ZOOM_LEVEL)))
+        }
+
     }
 
     private val listener = GoogleMap.OnMapLongClickListener { p0 -> setAddressOnMarker(p0) }
@@ -62,6 +83,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         mMap.addMarker(MarkerOptions().position(location!!).title(address))
-        mMap.moveCamera((CameraUpdateFactory.newLatLngZoom(location, 16f)))
+        mMap.moveCamera((CameraUpdateFactory.newLatLngZoom(location, ZOOM_LEVEL)))
     }
 }
